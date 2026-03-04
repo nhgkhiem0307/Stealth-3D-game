@@ -1,0 +1,59 @@
+﻿using UnityEngine;
+
+public class Bottle : MonoBehaviour
+{
+    public float throwForce = 10f;
+    public float noiseRadius = 100f;
+    public float dropNoise = 2f;
+
+    Rigidbody rb;
+    Collider col;
+
+    bool hasBeenThrown = false;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        col = GetComponent<Collider>();
+    }
+
+    public void PickUp(Transform holdPoint)
+    {
+        rb.isKinematic = true;
+        col.enabled = false;
+
+        transform.parent = holdPoint;
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+
+        NoiseSystem.instance.MakeNoise(transform.position, dropNoise);
+    }
+
+    public void Drop()
+    {
+        rb.isKinematic = false;
+        col.enabled = true;
+        transform.parent = null;
+
+        NoiseSystem.instance.MakeNoise(transform.position, dropNoise);
+    }
+
+    public void Throw(Vector3 direction)
+    {
+        rb.isKinematic = false;
+        col.enabled = true;
+        transform.parent = null;
+
+        rb.AddForce(direction * throwForce, ForceMode.Impulse);
+        hasBeenThrown = true;
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (!hasBeenThrown) return;
+
+        NoiseSystem.instance.MakeNoise(transform.position, noiseRadius);
+
+        hasBeenThrown = false; // tránh spam tiếng
+    }
+}
