@@ -9,7 +9,7 @@ public class Bottle : MonoBehaviour
     Rigidbody rb;
     Collider col;
 
-    bool hasBeenThrown = false;
+
 
     void Awake()
     {
@@ -45,15 +45,14 @@ public class Bottle : MonoBehaviour
         transform.parent = null;
 
         rb.AddForce(direction * throwForce, ForceMode.Impulse);
-        hasBeenThrown = true;
+
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        if (!hasBeenThrown) return;
+
 
         NoiseSystem.instance.MakeNoise(transform.position, noiseRadius);
 
-        hasBeenThrown = false; // tránh spam tiếng
     }
 }
