@@ -15,8 +15,11 @@ public class GameManager : MonoBehaviour
     public float fadeDuration = 1.5f;
     public float maxDetectionPercent;
 
+    public GameObject pausePanel;
+    bool isPaused = false;  
     bool gameOver = false;
 
+    public string MenuScene = "MenuScene";
     void Awake()
     {
         if (instance == null)
@@ -40,15 +43,13 @@ public class GameManager : MonoBehaviour
         }
 
         maxDetectionPercent = 0f; // reset mỗi frame
-    }
-
-    public void PlayerCaught()
-    {
-        if (gameOver) return;//tránh bug gọi hàm nhiều lần
-        gameOver = true;
-
-        loseText.SetActive(true);
-        StartCoroutine(FadeAndRestart());
+        if (Input.GetKeyDown(KeyCode.Escape))
+{
+        if (isPaused)
+        ResumeGame();
+        else
+        PauseGame();
+}
     }
 
     IEnumerator FadeAndRestart()
@@ -66,8 +67,66 @@ public class GameManager : MonoBehaviour
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+
+    IEnumerator FadeAndExit()
+    {
+        float t = 0f;
+        Color c = fadeImage.color;
+
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            c.a = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            fadeImage.color = c;
+            yield return null;
+        }
+
+        SceneManager.LoadScene(MenuScene);
+    }
+    
+    
+    
+    public void PlayerCaught()
+    {
+        if (gameOver) return;
+        gameOver = true;
+        loseText.SetActive(true);
+        StartCoroutine(FadeAndRestart());
+    }
     public void PlayerWin()
     {
         StartCoroutine(FadeAndRestart());
+    }
+
+    public void PauseGame()
+    {
+        pausePanel.SetActive(true);
+        Time.timeScale = 0f;
+        isPaused = true;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
+    public void ResumeGame()
+    {
+        pausePanel.SetActive(false);
+        Time.timeScale = 1f;
+        isPaused = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        StartCoroutine(FadeAndRestart());
+    }
+
+    public void ExitGame()
+    {
+        Time.timeScale = 1f;
+        StartCoroutine(FadeAndExit());
     }
 }
