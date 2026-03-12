@@ -16,9 +16,13 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Crouch")]
     public float standingHeight = 2.6f;
-    public float crouchingHeight = 1.3f;
-    public float crouchCameraY = 1.3f;
+    public float crouchingHeight = 1.2f;
+    public float crouchCameraY = 1.2f;
     public float standCameraY = 2.6f;
+
+    [Header("Stand Check")]
+    public float headCheckDistance = 1.5f;
+    public LayerMask obstacleMask;
 
     [Header("Interaction")]
     public Transform holdPoint;
@@ -26,7 +30,7 @@ public class PlayerMovement : MonoBehaviour
 
     public GameObject heldObject;
 
-
+    public FootstepSound footstep;
 
     CharacterController controller;
     Transform cameraTransform;
@@ -37,6 +41,8 @@ public class PlayerMovement : MonoBehaviour
     float noiseTimer = 0f;
     float noiseInterval = 0.5f; //am thanh phat tieng
 
+    Animator animator;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -44,6 +50,8 @@ public class PlayerMovement : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        animator = GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -51,6 +59,8 @@ public class PlayerMovement : MonoBehaviour
         Look();
         Move();
         HandleInteraction();
+        footstep.isWalking = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+        footstep.isRunning = footstep.isWalking && Input.GetKey(KeyCode.LeftShift);
     }
 
     void Move()
@@ -67,8 +77,16 @@ public class PlayerMovement : MonoBehaviour
         else if (isCrouching)
             speed = crouchSpeed;
 
+        if (Input.GetKey(KeyCode.LeftShift))
+            animator.speed = 1.8f;   // chạy animation nhanh
+        else
+            animator.speed = 1f;     // đi bộ bình thường
+
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
+
+        float moveAmount = new Vector2(x, z).magnitude;
+        animator.SetFloat("Speed", moveAmount);
 
         Vector3 move = transform.right * x + transform.forward * z;
         controller.Move(move * speed * Time.deltaTime);
@@ -93,10 +111,10 @@ public class PlayerMovement : MonoBehaviour
 
             if (noiseTimer <= 0f)
             {
-                float radius = 2f; // đi bộ nhỏ
+                float radius = 1f; // đi bộ nhỏ
 
                 if (Input.GetKey(KeyCode.LeftShift))
-                    radius = 8f;
+                    radius = 4f;
                 else if (isCrouching)
                     radius = 0f; //hmm balance sau
 
@@ -127,14 +145,17 @@ public class PlayerMovement : MonoBehaviour
             isCrouching = true;
             controller.height = crouchingHeight;
             controller.center = new Vector3(0, crouchingHeight / 2f, 0);
-            cameraTransform.localPosition = new Vector3(0, crouchCameraY, 0);
+            cameraTransform.localPosition = new Vector3(0, crouchCameraY, 0.5f);
         }
         else
         {
-            isCrouching = false;
-            controller.height = standingHeight;
-            controller.center = new Vector3(0, standingHeight / 2f, 0);
-            cameraTransform.localPosition = new Vector3(0, standCameraY, 0);
+            if (CanStand())
+            {
+                isCrouching = false;
+                controller.height = standingHeight;
+                controller.center = new Vector3(0, standingHeight / 2f, 0);
+                cameraTransform.localPosition = new Vector3(0, standCameraY, 0.5f);
+            }
         }
     }
     void HandleInteraction()
@@ -198,5 +219,11 @@ public class PlayerMovement : MonoBehaviour
         }
 
         heldObject = null;
+    }
+
+    bool CanStand()
+    {
+        Vector3 origin = transform.position + Vector3.up * crouchingHeight;
+        return !Physics.Raycast(origin, Vector3.up, headCheckDistance, obstacleMask);
     }
 }

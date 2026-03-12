@@ -2,14 +2,17 @@
 
 public class Bottle : MonoBehaviour
 {
+    [Header("Bottle Settings")]
     public float throwForce = 10f;
     public float noiseRadius = 100f;
     public float dropNoise = 2f;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip hitSound;
+
     Rigidbody rb;
     Collider col;
-
-
 
     void Awake()
     {
@@ -45,14 +48,16 @@ public class Bottle : MonoBehaviour
         transform.parent = null;
 
         rb.AddForce(direction * throwForce, ForceMode.Impulse);
-
     }
 
     void OnCollisionEnter(Collision collision)
     {
-
-
         NoiseSystem.instance.MakeNoise(transform.position, noiseRadius);
 
+        if (audioSource != null && hitSound != null) //check co null ko thi bo di cung dc
+        {
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            audioSource.PlayOneShot(hitSound);
+        }
     }
 }

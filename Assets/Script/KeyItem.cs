@@ -1,9 +1,12 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class KeyItem : MonoBehaviour
 {
     Rigidbody rb;
     Collider col;
+
+    public AudioClip pickupSound;     // sound nhặt
+    AudioSource playerAudio;          // audio của player
 
     void Awake()
     {
@@ -19,6 +22,15 @@ public class KeyItem : MonoBehaviour
         transform.parent = holdPoint;
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.identity;
+
+        // lấy AudioSource của player
+        playerAudio = holdPoint.GetComponentInParent<AudioSource>();
+
+        if (playerAudio != null && pickupSound != null)
+        {
+            playerAudio.PlayOneShot(pickupSound);
+        }
+
         NoiseSystem.instance.MakeNoise(transform.position, 2);
     }
 
@@ -27,6 +39,7 @@ public class KeyItem : MonoBehaviour
         rb.isKinematic = false;
         col.enabled = true;
         transform.parent = null;
+
         NoiseSystem.instance.MakeNoise(transform.position, 2);
     }
 }
