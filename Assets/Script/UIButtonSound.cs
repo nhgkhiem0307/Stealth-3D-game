@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class UIButtonSound : MonoBehaviour
@@ -8,16 +8,20 @@ public class UIButtonSound : MonoBehaviour
 
     void Start()
     {
-        Button[] buttons = FindObjectsOfType<Button>();
+        Button[] buttons = FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
         foreach (Button btn in buttons)
         {
+            btn.onClick.RemoveListener(PlaySound);
             btn.onClick.AddListener(PlaySound);
         }
     }
 
     void PlaySound()
     {
-        audioSource.PlayOneShot(clickSound);
+        if (audioSource != null && clickSound != null)
+        {
+            audioSource.PlayOneShot(clickSound);
+        }
     }
 }

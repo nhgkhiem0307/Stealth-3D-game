@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -31,6 +33,8 @@ public class PlayerMovement : MonoBehaviour
     public GameObject heldObject;
 
     public FootstepSound footstep;
+
+    public TextMeshProUGUI gameText;
 
     CharacterController controller;
     Transform cameraTransform;
@@ -160,23 +164,55 @@ public class PlayerMovement : MonoBehaviour
     }
     void HandleInteraction()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+
+
+        
+
+
+            Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, 5f))
+            {
+                Bottle bottle = hit.collider.GetComponent<Bottle>();
+                KeyItem key = hit.collider.GetComponent<KeyItem>();
+
+                if (bottle != null || key != null)
+                {
+                    gameText.gameObject.SetActive(true);
+                    gameText.text = "Click E to pick up";
+                    if (heldObject != null)
+                    {
+                        gameText.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    gameText.gameObject.SetActive(false);
+                }
+            }
+        
+
+
+           if (Input.GetKeyDown(KeyCode.E))
             TryPickUp();
-
+                      
         if (Input.GetKeyDown(KeyCode.Q))
-            Drop();
-
+            Drop();       
+        
         if (Input.GetMouseButtonDown(0))
             Throw();
     }
     void TryPickUp()
     {
-        if (heldObject != null) return; // đã cầm đồ rồi thì không nhặt nữa
+        if (heldObject != null)
+            return; // đã cầm đồ rồi thì không nhặt nữa           
+        
 
-        Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+            Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 30f))
+        if (Physics.Raycast(ray, out hit, 5f))
         {
             Bottle bottle = hit.collider.GetComponent<Bottle>();
             KeyItem key = hit.collider.GetComponent<KeyItem>();

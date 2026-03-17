@@ -88,12 +88,14 @@ public class EnemyPatrol : MonoBehaviour
             }
         }
     }
-
     void DetectPlayer()
     {
         bool canSee = false;
 
-        Vector3 directionToPlayer = player.position - transform.position;
+        Vector3 eyePos = transform.position + Vector3.up * 3f;
+        Vector3 playerTarget = player.position + Vector3.up * 1f; // ngắm vào thân / ngực player
+
+        Vector3 directionToPlayer = playerTarget - eyePos;
         float distanceToPlayer = directionToPlayer.magnitude;
 
         if (distanceToPlayer <= viewDistance)
@@ -102,10 +104,12 @@ public class EnemyPatrol : MonoBehaviour
 
             if (angle <= viewAngle / 2f)
             {
-                if (Physics.Raycast(transform.position + Vector3.up*2f,
+                if (Physics.Raycast(
+                    eyePos,
                     directionToPlayer.normalized,
                     out RaycastHit hit,
-                    viewDistance, obstacleMask))
+                    distanceToPlayer,
+                    obstacleMask))
                 {
                     if (hit.transform == player)
                     {
@@ -114,6 +118,7 @@ public class EnemyPatrol : MonoBehaviour
                 }
             }
         }
+    
 
         // XỬ LÝ DETECTION
         if (canSee)
@@ -182,7 +187,7 @@ public class EnemyPatrol : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
 
-        Vector3 eyePos = transform.position + Vector3.up*2f;
+        Vector3 eyePos = transform.position + Vector3.up*3f;
 
         // Tia chính diện
         Gizmos.DrawRay(eyePos, transform.forward * viewDistance);

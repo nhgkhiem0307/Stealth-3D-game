@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public GameObject loseText;
     public Image fadeImage;
     public Slider enemyWatchingSlider;
+    public Image Eye;
     public TextMeshProUGUI gameText; //gametext 2
     public float fadeDuration = 1.5f;
     public float maxDetectionPercent;
@@ -30,40 +31,53 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        Color Eyec = Eye.color;
+
+
         enemyWatchingSlider.value = maxDetectionPercent;
         if (maxDetectionPercent > 0)
         {
             enemyWatchingSlider.gameObject.SetActive(true);
             gameText.gameObject.SetActive(true);
+            Eyec.a = maxDetectionPercent /3;
+            Eye.color = Eyec;
         }
         else
         {
             enemyWatchingSlider.gameObject.SetActive(false);
             gameText.gameObject.SetActive(false);
+            Eyec.a = 0; 
+            Eye.color = Eyec;
+
         }
 
         maxDetectionPercent = 0f; // reset mỗi frame
         if (Input.GetKeyDown(KeyCode.Escape))
-{
-        if (isPaused)
-        ResumeGame();
-        else
-        PauseGame();
-}
+        {
+            if (isPaused)
+            {
+                ResumeGame();
+            }
+            else
+            {
+                PauseGame();
+            }
+        }
     }
 
     IEnumerator FadeAndRestart()
     {
         float t = 0f;
-        Color c = fadeImage.color;
+        Color fadeImagec = fadeImage.color;
 
         while (t < fadeDuration)
         {
             t += Time.deltaTime;
-            c.a = Mathf.Lerp(0f, 1f, t / fadeDuration);
-            fadeImage.color = c;
+            fadeImagec.a = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            fadeImage.color = fadeImagec;
             yield return null;
         }
+
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
@@ -80,7 +94,8 @@ public class GameManager : MonoBehaviour
             fadeImage.color = c;
             yield return null;
         }
-
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         SceneManager.LoadScene(MenuScene);
     }
     
@@ -95,7 +110,7 @@ public class GameManager : MonoBehaviour
     }
     public void PlayerWin()
     {
-        StartCoroutine(FadeAndRestart());
+        StartCoroutine(FadeAndExit());
     }
 
     public void PauseGame()
@@ -121,12 +136,16 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         Time.timeScale = 1f;
+        pausePanel.SetActive(false);
         StartCoroutine(FadeAndRestart());
     }
 
     public void ExitGame()
     {
         Time.timeScale = 1f;
+        pausePanel.SetActive(false);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         StartCoroutine(FadeAndExit());
     }
 }
