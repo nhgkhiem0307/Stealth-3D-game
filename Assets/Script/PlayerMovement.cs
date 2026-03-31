@@ -115,10 +115,10 @@ public class PlayerMovement : MonoBehaviour
 
             if (noiseTimer <= 0f)
             {
-                float radius = 1f; // đi bộ nhỏ
+                float radius = 2f; // đi bộ nhỏ
 
                 if (Input.GetKey(KeyCode.LeftShift))
-                    radius = 4f;
+                    radius = 5f;
                 else if (isCrouching)
                     radius = 0f; //hmm balance sau
 
